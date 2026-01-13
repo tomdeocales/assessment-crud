@@ -8,6 +8,7 @@ import PostEditPage from './pages/PostEditPage'
 import PostsPage from './pages/PostsPage'
 import RegisterPage from './pages/RegisterPage'
 import NotFoundPage from './pages/NotFoundPage'
+import LogoutPage from './pages/LogoutPage'
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
         children: [
           { path: 'posts/new', element: <PostCreatePage /> },
           { path: 'posts/:id/edit', element: <PostEditPage /> },
+          { path: 'logout', element: <LogoutPage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

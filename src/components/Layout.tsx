@@ -14,7 +14,12 @@ export default function Layout() {
           </NavLink>
           <div className="spacer" />
           {user ? (
-            <span className="muted">{user.email}</span>
+            <>
+              <span className="muted">{user.email}</span>
+              <NavLink to="/logout" className="navlink">
+                Logout
+              </NavLink>
+            </>
           ) : (
             <>
               <NavLink to="/login" className="navlink">
