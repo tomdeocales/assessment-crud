@@ -80,6 +80,8 @@ button:focus-visible {
   border: 1px solid #d1d5db;
   border-radius: 8px;
   background: #ffffff;
+  font-family: inherit;
+  font-size: 1em;
 }
 
 .error {
@@ -124,4 +126,73 @@ button.link {
 }
 button.link:hover {
   text-decoration: underline;
+}
+
+.page-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.post-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.post-row {
+  padding: 12px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.post-row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.post-title {
+  display: inline-block;
+  font-size: 1.1em;
+  color: #111827;
+}
+
+.post-title:hover {
+  color: #2563eb;
+}
+
+.post-meta {
+  margin-top: 4px;
+}
+
+.post-snippet {
+  margin-top: 8px;
+  color: #374151;
+  white-space: pre-wrap;
+}
+
+.post-title-big {
+  margin: 0 0 6px;
+}
+
+.post-content {
+  margin-top: 12px;
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
 }
