@@ -5,27 +5,31 @@ import { isSupabaseConfigured } from '../lib/supabaseClient'
 export default function Layout() {
   const { user } = useAppSelector((s) => s.auth)
 
+  function getNavClass({ isActive }: { isActive: boolean }) {
+    return isActive ? 'navlink active' : 'navlink'
+  }
+
   return (
     <div>
       <header className="topbar">
         <div className="topbar-inner">
-          <NavLink to="/posts" className="navlink">
+          <NavLink to="/posts" className={getNavClass}>
             Simple Blog
           </NavLink>
           <div className="spacer" />
           {user ? (
             <>
               <span className="muted">{user.email}</span>
-              <NavLink to="/logout" className="navlink">
+              <NavLink to="/logout" className={getNavClass}>
                 Logout
               </NavLink>
             </>
           ) : (
             <>
-              <NavLink to="/login" className="navlink">
+              <NavLink to="/login" className={getNavClass}>
                 Login
               </NavLink>
-              <NavLink to="/register" className="navlink">
+              <NavLink to="/register" className={getNavClass}>
                 Register
               </NavLink>
             </>

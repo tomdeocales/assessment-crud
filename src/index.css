@@ -82,6 +82,12 @@ button:focus-visible {
   background: #ffffff;
   font-family: inherit;
   font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+textarea.input {
+  resize: vertical;
 }
 
 .error {
