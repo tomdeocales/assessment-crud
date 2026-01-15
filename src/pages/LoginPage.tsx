@@ -3,19 +3,26 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAppSelector } from '../app/hooks'
 import { supabase } from '../lib/supabaseClient'
 
+type LoginLocationState = {
+  from?: { pathname: string }
+  registered?: boolean
+  email?: string
+}
+
 export default function LoginPage() {
   const auth = useAppSelector((s) => s.auth)
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [email, setEmail] = useState('')
+  const state = location.state as LoginLocationState | null
+
+  const [email, setEmail] = useState(() => state?.email ?? '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const fromPath =
-    (location.state as { from?: { pathname: string } } | null)?.from?.pathname ??
-    '/posts'
+    state?.from?.pathname ?? '/posts'
 
   if (!auth.ready) {
     return (
@@ -65,6 +72,11 @@ export default function LoginPage() {
     <div className="container">
       <h1>Login</h1>
       <div className="card">
+        {state?.registered ? (
+          <div className="success">
+            Your account has been successfully created. Please login.
+          </div>
+        ) : null}
         {error ? <div className="error">{error}</div> : null}
 
         <form className="form" onSubmit={handleSubmit}>

@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabaseClient'
 export type Post = {
   id: string
   user_id: string
+  username: string
   title: string
   content: string
   created_at: string
@@ -34,6 +35,13 @@ const initialState: PostsState = {
   error: null,
 }
 
+function emailToUsername(email: string | null | undefined) {
+  if (!email) return ''
+  const at = email.indexOf('@')
+  if (at === -1) return email
+  return email.slice(0, at)
+}
+
 export const fetchPosts = createAsyncThunk<
   { items: Post[]; total: number; page: number; pageSize: number },
   { page: number; pageSize: number },
@@ -48,7 +56,9 @@ export const fetchPosts = createAsyncThunk<
 
     const { data, error, count } = await supabase
       .from('posts')
-      .select('id,user_id,title,content,created_at,updated_at', { count: 'exact' })
+      .select('id,user_id,username,title,content,created_at,updated_at', {
+        count: 'exact',
+      })
       .order('created_at', { ascending: false })
       .range(from, to)
 
@@ -69,7 +79,7 @@ export const fetchPostById = createAsyncThunk<Post, string, { rejectValue: strin
 
     const { data, error } = await supabase
       .from('posts')
-      .select('id,user_id,title,content,created_at,updated_at')
+      .select('id,user_id,username,title,content,created_at,updated_at')
       .eq('id', id)
       .single()
 
@@ -94,10 +104,12 @@ export const createPost = createAsyncThunk<
     const content = args.content.trim()
     if (!title || !content) return rejectWithValue('Title and content are required')
 
+    const username = emailToUsername(user.email)
+
     const { data, error } = await supabase
       .from('posts')
-      .insert({ title, content, user_id: user.id })
-      .select('id,user_id,title,content,created_at,updated_at')
+      .insert({ title, content, user_id: user.id, username })
+      .select('id,user_id,username,title,content,created_at,updated_at')
       .single()
 
     if (error) return rejectWithValue(error.message)
@@ -125,7 +137,7 @@ export const updatePost = createAsyncThunk<
       .update({ title, content, updated_at: new Date().toISOString() })
       .eq('id', args.id)
       .eq('user_id', user.id)
-      .select('id,user_id,title,content,created_at,updated_at')
+      .select('id,user_id,username,title,content,created_at,updated_at')
       .single()
 
     if (error) return rejectWithValue(error.message)

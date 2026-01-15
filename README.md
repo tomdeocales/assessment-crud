@@ -41,6 +41,7 @@ Notes:
 - Anyone can view posts (public read)
 - Only logged-in users can create posts
 - Only the owner can update/delete their own post
+- Username shown in posts is just the email before `@` (stored when creating the post).
 
 ## Run
 

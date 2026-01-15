@@ -11,7 +11,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [info, setInfo] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   if (!auth.ready) {
@@ -22,21 +21,22 @@ export default function RegisterPage() {
     )
   }
 
-  if (auth.user) {
+  if (auth.user && !loading) {
     return <Navigate to="/posts" replace />
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    setInfo(null)
 
     if (!supabase) {
       setError('Missing Supabase setup. Check your .env file.')
       return
     }
 
-    if (!email.trim() || !password) {
+    const cleanEmail = email.trim()
+
+    if (!cleanEmail || !password) {
       setError('Please fill up all fields.')
       return
     }
@@ -48,8 +48,8 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
+      const { error } = await supabase.auth.signUp({
+        email: cleanEmail,
         password,
       })
 
@@ -58,11 +58,14 @@ export default function RegisterPage() {
         return
       }
 
-      if (data.session) {
-        navigate('/posts', { replace: true })
-      } else {
-        setInfo('Account created. Please check your email to confirm.')
-      }
+      await supabase.auth.signOut()
+      navigate('/login', {
+        replace: true,
+        state: {
+          registered: true,
+          email: cleanEmail,
+        },
+      })
     } finally {
       setLoading(false)
     }
@@ -73,7 +76,6 @@ export default function RegisterPage() {
       <h1>Register</h1>
       <div className="card">
         {error ? <div className="error">{error}</div> : null}
-        {info ? <p className="muted">{info}</p> : null}
 
         <form className="form" onSubmit={handleSubmit}>
           <input

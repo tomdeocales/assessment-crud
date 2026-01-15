@@ -5,11 +5,15 @@ create extension if not exists "pgcrypto";
 create table if not exists public.posts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
+  username text not null,
   title text not null,
   content text not null,
   created_at timestamptz not null default now(),
   updated_at timestamptz
 );
+
+alter table public.posts
+add column if not exists username text not null default '';
 
 create index if not exists posts_created_at_idx on public.posts (created_at desc);
 create index if not exists posts_user_id_idx on public.posts (user_id);

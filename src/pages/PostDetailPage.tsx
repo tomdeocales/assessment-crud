@@ -55,6 +55,7 @@ export default function PostDetailPage() {
           <>
             <h2 className="post-title-big">{post.title}</h2>
             <div className="muted">
+              {(post.username?.trim() ? post.username : 'unknown') + ' • '}
               {new Date(post.created_at).toLocaleString()}
               {post.updated_at ? (
                 <>

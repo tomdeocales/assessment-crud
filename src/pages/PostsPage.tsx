@@ -48,6 +48,7 @@ export default function PostsPage() {
         <div className="post-list">
           {posts.items.map((p) => {
             const dateLabel = new Date(p.created_at).toLocaleString()
+            const username = p.username?.trim() ? p.username : 'unknown'
             const snippet =
               p.content.length > 140 ? `${p.content.slice(0, 140)}...` : p.content
 
@@ -57,7 +58,9 @@ export default function PostsPage() {
                   <Link to={`/posts/${p.id}`} className="post-title">
                     {p.title}
                   </Link>
-                  <div className="muted post-meta">{dateLabel}</div>
+                  <div className="muted post-meta">
+                    {username} • {dateLabel}
+                  </div>
                   <div className="post-snippet">{snippet}</div>
                 </div>
               </div>

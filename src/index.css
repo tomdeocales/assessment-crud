@@ -98,6 +98,14 @@ textarea.input {
   border-radius: 10px;
 }
 
+.success {
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
 .topbar {
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
