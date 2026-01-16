@@ -20,13 +20,14 @@ export default function PostEditPage() {
     dispatch(fetchPostById(id))
   }, [dispatch, id])
 
-  useEffect(() => {
-    if (!posts.current) return
-    setTitle(posts.current.title)
-    setContent(posts.current.content)
-  }, [posts.current])
-
   const post = posts.current
+
+  useEffect(() => {
+    if (!post) return
+    setTitle(post.title)
+    setContent(post.content)
+  }, [post])
+
   const isOwner = Boolean(user && post && post.user_id === user.id)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -54,7 +55,9 @@ export default function PostEditPage() {
     <div className="container">
       <div className="page-title">
         <h1>Edit post</h1>
-        <Link to={id ? `/posts/${id}` : '/posts'}>Back</Link>
+        <Link to={id ? `/posts/${id}` : '/posts'} className="pill">
+          Back
+        </Link>
       </div>
       <div className="card">
         {posts.currentStatus === 'loading' ? (

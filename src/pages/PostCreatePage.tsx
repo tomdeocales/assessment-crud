@@ -35,7 +35,16 @@ export default function PostCreatePage() {
 
   return (
     <div className="container">
-      <h1>Create post</h1>
+      <div className="page-title">
+        <h1>Create post</h1>
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => navigate('/posts')}
+        >
+          Back
+        </button>
+      </div>
       <div className="card">
         {error ? <div className="error">{error}</div> : null}
 

@@ -9,7 +9,9 @@ export default function NotFoundPage() {
           The page you are trying to open doesn&apos;t exist.
         </p>
         <p>
-          <Link to="/posts">Go back to posts</Link>
+          <Link to="/posts" className="pill">
+            Go back to posts
+          </Link>
         </p>
       </div>
     </div>

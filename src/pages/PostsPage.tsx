@@ -35,7 +35,11 @@ export default function PostsPage() {
     <div className="container">
       <div className="page-title">
         <h1>Posts</h1>
-        {user ? <Link to="/posts/new">Create</Link> : null}
+        {user ? (
+          <Link to="/posts/new" className="pill">
+            Create
+          </Link>
+        ) : null}
       </div>
       <div className="card">
         {posts.listStatus === 'loading' ? <p className="muted">Loading...</p> : null}

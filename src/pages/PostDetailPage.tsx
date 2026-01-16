@@ -41,7 +41,9 @@ export default function PostDetailPage() {
     <div className="container">
       <div className="page-title">
         <h1>Post</h1>
-        <Link to="/posts">Back</Link>
+        <Link to="/posts" className="pill">
+          Back
+        </Link>
       </div>
       <div className="card">
         {posts.currentStatus === 'loading' ? (
@@ -69,8 +71,15 @@ export default function PostDetailPage() {
 
             {ready && canEdit ? (
               <div className="actions">
-                <Link to={`/posts/${post.id}/edit`}>Edit</Link>
-                <button type="button" onClick={handleDelete} disabled={deleting}>
+                <Link to={`/posts/${post.id}/edit`} className="pill">
+                  Edit
+                </Link>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
                   {deleting ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
