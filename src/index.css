@@ -96,6 +96,7 @@ textarea.input {
   border: 1px solid #fecaca;
   padding: 10px 12px;
   border-radius: 10px;
+  margin-bottom: 12px;
 }
 
 .success {
@@ -104,6 +105,7 @@ textarea.input {
   border: 1px solid #a7f3d0;
   padding: 10px 12px;
   border-radius: 10px;
+  margin-bottom: 12px;
 }
 
 .topbar {
