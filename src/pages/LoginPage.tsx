@@ -23,6 +23,7 @@ export default function LoginPage() {
 
   const fromPath =
     state?.from?.pathname ?? '/posts'
+  const safeFromPath = fromPath === '/logout' ? '/posts' : fromPath
 
   if (!auth.ready) {
     return (
@@ -62,7 +63,7 @@ export default function LoginPage() {
         return
       }
 
-      navigate(fromPath, { replace: true })
+      navigate(safeFromPath, { replace: true })
     } finally {
       setLoading(false)
     }

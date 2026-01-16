@@ -1,34 +1,68 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAppSelector } from '../app/hooks'
 import { supabase } from '../lib/supabaseClient'
 
 export default function LogoutPage() {
+  const auth = useAppSelector((s) => s.auth)
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    let ignore = false
+  async function handleLogout() {
+    setError(null)
 
-    async function run() {
-      if (!supabase) {
-        navigate('/login', { replace: true })
+    if (!supabase) {
+      setError('Missing Supabase setup. Check your .env file.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        setError(error.message)
         return
       }
 
-      await supabase.auth.signOut()
-      if (ignore) return
       navigate('/login', { replace: true })
+    } finally {
+      setLoading(false)
     }
+  }
 
-    run()
+  if (!auth.ready) {
+    return (
+      <div className="container">
+        <div className="card">Loading...</div>
+      </div>
+    )
+  }
 
-    return () => {
-      ignore = true
-    }
-  }, [navigate])
+  if (!auth.user) {
+    return (
+      <div className="container">
+        <h1>Logout</h1>
+        <div className="card">
+          <p className="muted">You are already logged out.</p>
+          <p>
+            <Link to="/login">Go to login</Link>
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="container">
-      <div className="card">Logging out...</div>
+      <h1>Logout</h1>
+      <div className="card">
+        {error ? <div className="error">{error}</div> : null}
+        <p className="muted">Are you sure you want to logout?</p>
+        <button type="button" onClick={handleLogout} disabled={loading}>
+          {loading ? 'Logging out...' : 'Logout'}
+        </button>
+      </div>
     </div>
   )
 }

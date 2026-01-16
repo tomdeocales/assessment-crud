@@ -18,6 +18,7 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="/posts" replace /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
+      { path: 'logout', element: <LogoutPage /> },
       { path: 'posts', element: <PostsPage /> },
       { path: 'posts/:id', element: <PostDetailPage /> },
       {
@@ -25,7 +26,6 @@ const router = createBrowserRouter([
         children: [
           { path: 'posts/new', element: <PostCreatePage /> },
           { path: 'posts/:id/edit', element: <PostEditPage /> },
-          { path: 'logout', element: <LogoutPage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },
