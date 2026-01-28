@@ -43,6 +43,7 @@ Notes:
 - Only the owner can update/delete their own post
 - Username shown in posts is just the email before `@` (stored when creating the post).
 - Images are uploaded to Supabase Storage bucket `blog-images` (created in the SQL file).
+- Comments are stored in `public.comments` (also created in the SQL file).
 
 ## Run
 

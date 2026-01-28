@@ -67,6 +67,50 @@ for delete
 to authenticated
 using (auth.uid() = user_id);
 
+-- Comments
+create table if not exists public.comments (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references public.posts(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  username text not null,
+  content text not null default '',
+  image_url text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists comments_post_id_idx on public.comments (post_id);
+create index if not exists comments_created_at_idx on public.comments (created_at);
+
+alter table public.comments enable row level security;
+
+drop policy if exists "Public can read comments" on public.comments;
+create policy "Public can read comments"
+on public.comments
+for select
+using (true);
+
+drop policy if exists "Users can insert their comments" on public.comments;
+create policy "Users can insert their comments"
+on public.comments
+for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+drop policy if exists "Users can update their comments" on public.comments;
+create policy "Users can update their comments"
+on public.comments
+for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+drop policy if exists "Users can delete their comments" on public.comments;
+create policy "Users can delete their comments"
+on public.comments
+for delete
+to authenticated
+using (auth.uid() = user_id);
+
 -- Storage bucket for images
 -- If you want the images to be viewable publicly, keep this bucket public.
 insert into storage.buckets (id, name, public)
