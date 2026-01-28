@@ -57,17 +57,15 @@ export default function PostsPage() {
               p.content.length > 140 ? `${p.content.slice(0, 140)}...` : p.content
 
             return (
-              <div key={p.id} className="post-row">
+              <Link key={p.id} to={`/posts/${p.id}`} className="post-row">
                 <div className="post-row-main">
-                  <Link to={`/posts/${p.id}`} className="post-title">
-                    {p.title}
-                  </Link>
+                  <div className="post-title">{p.title}</div>
                   <div className="muted post-meta">
                     {username} • {dateLabel}
                   </div>
                   <div className="post-snippet">{snippet}</div>
                 </div>
-              </div>
+              </Link>
             )
           })}
         </div>

@@ -224,10 +224,13 @@ button.link:hover {
 }
 
 .post-row {
+  display: block;
   padding: 12px;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   background: #ffffff;
+  text-decoration: none;
+  color: inherit;
 }
 .post-row:hover {
   border-color: #bfdbfe;
@@ -239,8 +242,7 @@ button.link:hover {
   font-size: 1.1em;
   color: #111827;
 }
-
-.post-title:hover {
+.post-row:hover .post-title {
   color: #2563eb;
 }
 
