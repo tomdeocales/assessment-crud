@@ -8,12 +8,16 @@ create table if not exists public.posts (
   username text not null,
   title text not null,
   content text not null,
+  image_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz
 );
 
 alter table public.posts
 add column if not exists username text not null default '';
+
+alter table public.posts
+add column if not exists image_url text;
 
 create index if not exists posts_created_at_idx on public.posts (created_at desc);
 create index if not exists posts_user_id_idx on public.posts (user_id);
@@ -62,3 +66,37 @@ on public.posts
 for delete
 to authenticated
 using (auth.uid() = user_id);
+
+-- Storage bucket for images
+-- If you want the images to be viewable publicly, keep this bucket public.
+insert into storage.buckets (id, name, public)
+values ('blog-images', 'blog-images', true)
+on conflict (id) do nothing;
+
+drop policy if exists "Public can view blog images" on storage.objects;
+create policy "Public can view blog images"
+on storage.objects
+for select
+using (bucket_id = 'blog-images');
+
+drop policy if exists "Authenticated can upload blog images" on storage.objects;
+create policy "Authenticated can upload blog images"
+on storage.objects
+for insert
+to authenticated
+with check (bucket_id = 'blog-images');
+
+drop policy if exists "Users can update their blog images" on storage.objects;
+create policy "Users can update their blog images"
+on storage.objects
+for update
+to authenticated
+using (bucket_id = 'blog-images' and auth.uid() = owner)
+with check (bucket_id = 'blog-images' and auth.uid() = owner);
+
+drop policy if exists "Users can delete their blog images" on storage.objects;
+create policy "Users can delete their blog images"
+on storage.objects
+for delete
+to authenticated
+using (bucket_id = 'blog-images' and auth.uid() = owner);

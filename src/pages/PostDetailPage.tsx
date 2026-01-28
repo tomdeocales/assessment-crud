@@ -67,6 +67,15 @@ export default function PostDetailPage() {
               ) : null}
             </div>
 
+            {post.image_url ? (
+              <img
+                src={post.image_url}
+                alt="Post image"
+                className="post-image"
+                loading="lazy"
+              />
+            ) : null}
+
             <div className="post-content">{post.content}</div>
 
             {ready && canEdit ? (

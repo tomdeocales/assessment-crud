@@ -9,6 +9,7 @@ export type Post = {
   username: string
   title: string
   content: string
+  image_url: string | null
   created_at: string
   updated_at: string | null
 }
@@ -56,7 +57,7 @@ export const fetchPosts = createAsyncThunk<
 
     const { data, error, count } = await supabase
       .from('posts')
-      .select('id,user_id,username,title,content,created_at,updated_at', {
+      .select('id,user_id,username,title,content,image_url,created_at,updated_at', {
         count: 'exact',
       })
       .order('created_at', { ascending: false })
@@ -79,7 +80,7 @@ export const fetchPostById = createAsyncThunk<Post, string, { rejectValue: strin
 
     const { data, error } = await supabase
       .from('posts')
-      .select('id,user_id,username,title,content,created_at,updated_at')
+      .select('id,user_id,username,title,content,image_url,created_at,updated_at')
       .eq('id', id)
       .single()
 
@@ -91,7 +92,7 @@ export const fetchPostById = createAsyncThunk<Post, string, { rejectValue: strin
 
 export const createPost = createAsyncThunk<
   Post,
-  { title: string; content: string },
+  { title: string; content: string; image_url?: string | null },
   { rejectValue: string; state: RootState }
 >('posts/createPost', async (args, { getState, rejectWithValue }) => {
     if (!supabase) return rejectWithValue('Supabase is not configured')
@@ -105,11 +106,12 @@ export const createPost = createAsyncThunk<
     if (!title || !content) return rejectWithValue('Title and content are required')
 
     const username = emailToUsername(user.email)
+    const image_url = args.image_url ?? null
 
     const { data, error } = await supabase
       .from('posts')
-      .insert({ title, content, user_id: user.id, username })
-      .select('id,user_id,username,title,content,created_at,updated_at')
+      .insert({ title, content, user_id: user.id, username, image_url })
+      .select('id,user_id,username,title,content,image_url,created_at,updated_at')
       .single()
 
     if (error) return rejectWithValue(error.message)
@@ -137,7 +139,7 @@ export const updatePost = createAsyncThunk<
       .update({ title, content, updated_at: new Date().toISOString() })
       .eq('id', args.id)
       .eq('user_id', user.id)
-      .select('id,user_id,username,title,content,created_at,updated_at')
+      .select('id,user_id,username,title,content,image_url,created_at,updated_at')
       .single()
 
     if (error) return rejectWithValue(error.message)

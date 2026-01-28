@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../app/hooks'
 import { createPost } from '../features/posts/postsSlice'
+import { uploadImage } from '../lib/uploadImage'
 
 export default function PostCreatePage() {
   const dispatch = useAppDispatch()
@@ -10,8 +11,21 @@ export default function PostCreatePage() {
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreview(null)
+      return
+    }
+
+    const url = URL.createObjectURL(imageFile)
+    setImagePreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [imageFile])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -24,7 +38,19 @@ export default function PostCreatePage() {
 
     setLoading(true)
     try {
-      const created = await dispatch(createPost({ title, content })).unwrap()
+      let imageUrl: string | null = null
+      if (imageFile) {
+        const uploaded = await uploadImage({
+          userId: auth.user.id,
+          folder: 'posts',
+          file: imageFile,
+        })
+        imageUrl = uploaded.publicUrl
+      }
+
+      const created = await dispatch(
+        createPost({ title, content, image_url: imageUrl }),
+      ).unwrap()
       navigate(`/posts/${created.id}`, { replace: true })
     } catch (e) {
       setError(String(e))
@@ -55,6 +81,20 @@ export default function PostCreatePage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
+          <input
+            className="input"
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+          />
+          {imagePreview ? (
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="preview-img"
+              loading="lazy"
+            />
+          ) : null}
           <textarea
             className="input"
             placeholder="Write something..."
