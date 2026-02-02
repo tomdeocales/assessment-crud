@@ -351,3 +351,28 @@ button.link:hover {
 .danger-link:hover {
   color: #991b1b;
 }
+
+.image-box {
+  position: relative;
+  display: inline-block;
+}
+
+.remove-img-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.remove-img-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}

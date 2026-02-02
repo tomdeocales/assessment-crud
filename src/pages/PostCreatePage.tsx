@@ -88,12 +88,21 @@ export default function PostCreatePage() {
             onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
           />
           {imagePreview ? (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="preview-img"
-              loading="lazy"
-            />
+            <div className="image-box">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="preview-img"
+                loading="lazy"
+              />
+              <button
+                type="button"
+                className="remove-img-btn"
+                onClick={() => setImageFile(null)}
+              >
+                x
+              </button>
+            </div>
           ) : null}
           <textarea
             className="input"

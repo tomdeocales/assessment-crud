@@ -121,7 +121,7 @@ export const createPost = createAsyncThunk<
 
 export const updatePost = createAsyncThunk<
   Post,
-  { id: string; title: string; content: string },
+  { id: string; title: string; content: string; image_url?: string | null },
   { rejectValue: string; state: RootState }
 >('posts/updatePost', async (args, { getState, rejectWithValue }) => {
     if (!supabase) return rejectWithValue('Supabase is not configured')
@@ -134,9 +134,19 @@ export const updatePost = createAsyncThunk<
     const content = args.content.trim()
     if (!title || !content) return rejectWithValue('Title and content are required')
 
+    // build update data
+    const updateData: Record<string, unknown> = {
+      title,
+      content,
+      updated_at: new Date().toISOString(),
+    }
+    if (args.image_url !== undefined) {
+      updateData.image_url = args.image_url
+    }
+
     const { data, error } = await supabase
       .from('posts')
-      .update({ title, content, updated_at: new Date().toISOString() })
+      .update(updateData)
       .eq('id', args.id)
       .eq('user_id', user.id)
       .select('id,user_id,username,title,content,image_url,created_at,updated_at')
