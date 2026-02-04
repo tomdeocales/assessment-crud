@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../app/hooks'
 import { deletePost, fetchPostById } from '../features/posts/postsSlice'
-import { createComment, deleteComment, fetchComments } from '../features/comments/commentsSlice'
+import { createComment, deleteComment, updateComment, fetchComments } from '../features/comments/commentsSlice'
 import { uploadImage } from '../lib/uploadImage'
 
 export default function PostDetailPage() {
@@ -20,6 +20,15 @@ export default function PostDetailPage() {
   const [commentPreview, setCommentPreview] = useState<string | null>(null)
   const [commentError, setCommentError] = useState<string | null>(null)
   const [commentSending, setCommentSending] = useState(false)
+
+  // edit comment state
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
+  const [editCommentText, setEditCommentText] = useState('')
+  const [editCommentFile, setEditCommentFile] = useState<File | null>(null)
+  const [editCommentPreview, setEditCommentPreview] = useState<string | null>(null)
+  const [editCommentExistingImg, setEditCommentExistingImg] = useState<string | null>(null)
+  const [editCommentImgRemoved, setEditCommentImgRemoved] = useState(false)
+  const [editCommentSaving, setEditCommentSaving] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -40,6 +49,17 @@ export default function PostDetailPage() {
     setCommentPreview(url)
     return () => URL.revokeObjectURL(url)
   }, [commentFile])
+
+  useEffect(() => {
+    if (!editCommentFile) {
+      setEditCommentPreview(null)
+      return
+    }
+
+    const url = URL.createObjectURL(editCommentFile)
+    setEditCommentPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [editCommentFile])
 
   async function handleDelete() {
     if (!id) return
@@ -103,6 +123,59 @@ export default function PostDetailPage() {
       await dispatch(deleteComment(commentId)).unwrap()
     } catch {
       // ignore
+    }
+  }
+
+  function startEditComment(c: { id: string; content: string; image_url: string | null }) {
+    setEditingCommentId(c.id)
+    setEditCommentText(c.content)
+    setEditCommentExistingImg(c.image_url)
+    setEditCommentFile(null)
+    setEditCommentImgRemoved(false)
+  }
+
+  function cancelEditComment() {
+    setEditingCommentId(null)
+    setEditCommentText('')
+    setEditCommentFile(null)
+    setEditCommentExistingImg(null)
+    setEditCommentImgRemoved(false)
+  }
+
+  function handleEditCommentRemoveImg() {
+    setEditCommentFile(null)
+    setEditCommentExistingImg(null)
+    setEditCommentImgRemoved(true)
+  }
+
+  async function handleSaveEditComment(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editingCommentId || !user) return
+
+    setEditCommentSaving(true)
+    try {
+      let imageUrl: string | null | undefined = undefined
+
+      if (editCommentFile) {
+        const uploaded = await uploadImage({
+          userId: user.id,
+          folder: 'comments',
+          file: editCommentFile,
+        })
+        imageUrl = uploaded.publicUrl
+      } else if (editCommentImgRemoved) {
+        imageUrl = null
+      }
+
+      await dispatch(
+        updateComment({ id: editingCommentId, content: editCommentText, image_url: imageUrl })
+      ).unwrap()
+
+      cancelEditComment()
+    } catch {
+      // ignore
+    } finally {
+      setEditCommentSaving(false)
     }
   }
 
@@ -211,7 +284,8 @@ export default function PostDetailPage() {
 
         <div className="comment-list">
           {comments.items.map((c) => {
-            const canDelete = Boolean(user && c.user_id === user.id)
+            const isOwner = Boolean(user && c.user_id === user.id)
+            const isEditing = editingCommentId === c.id
 
             return (
               <div key={c.id} className="comment-row">
@@ -222,26 +296,89 @@ export default function PostDetailPage() {
                   <div className="muted comment-date">
                     {new Date(c.created_at).toLocaleString()}
                   </div>
-                  {canDelete ? (
-                    <button
-                      type="button"
-                      className="link danger-link"
-                      onClick={() => handleDeleteComment(c.id)}
-                    >
-                      delete
-                    </button>
+                  {isOwner && !isEditing ? (
+                    <>
+                      <button
+                        type="button"
+                        className="link"
+                        onClick={() => startEditComment(c)}
+                      >
+                        edit
+                      </button>
+                      <button
+                        type="button"
+                        className="link danger-link"
+                        onClick={() => handleDeleteComment(c.id)}
+                      >
+                        delete
+                      </button>
+                    </>
                   ) : null}
                 </div>
 
-                {c.image_url ? (
-                  <img
-                    src={c.image_url}
-                    alt="Comment"
-                    className="comment-image"
-                    loading="lazy"
-                  />
-                ) : null}
-                {c.content ? <div className="comment-text">{c.content}</div> : null}
+                {isEditing ? (
+                  <form className="form" onSubmit={handleSaveEditComment} style={{ marginTop: 8 }}>
+                    <textarea
+                      className="input"
+                      value={editCommentText}
+                      onChange={(e) => setEditCommentText(e.target.value)}
+                      rows={3}
+                    />
+
+                    {/* existing image */}
+                    {editCommentExistingImg && !editCommentPreview && (
+                      <div className="image-box">
+                        <img src={editCommentExistingImg} alt="Current" className="preview-img" loading="lazy" />
+                        <button type="button" className="remove-img-btn" onClick={handleEditCommentRemoveImg}>x</button>
+                      </div>
+                    )}
+
+                    {/* new image preview */}
+                    {editCommentPreview && (
+                      <div className="image-box">
+                        <img src={editCommentPreview} alt="New" className="preview-img" loading="lazy" />
+                        <button type="button" className="remove-img-btn" onClick={handleEditCommentRemoveImg}>x</button>
+                      </div>
+                    )}
+
+                    {/* file input when no image */}
+                    {!editCommentExistingImg && !editCommentPreview && (
+                      <input
+                        className="input"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0] ?? null
+                          if (f) {
+                            setEditCommentFile(f)
+                            setEditCommentImgRemoved(false)
+                          }
+                        }}
+                      />
+                    )}
+
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button type="submit" disabled={editCommentSaving}>
+                        {editCommentSaving ? 'Saving...' : 'Save'}
+                      </button>
+                      <button type="button" className="secondary" onClick={cancelEditComment}>
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    {c.image_url ? (
+                      <img
+                        src={c.image_url}
+                        alt="Comment"
+                        className="comment-image"
+                        loading="lazy"
+                      />
+                    ) : null}
+                    {c.content ? <div className="comment-text">{c.content}</div> : null}
+                  </>
+                )}
               </div>
             )
           })}

@@ -90,6 +90,37 @@ export const createComment = createAsyncThunk<
   return data as Comment
 })
 
+export const updateComment = createAsyncThunk<
+  Comment,
+  { id: string; content: string; image_url?: string | null },
+  { rejectValue: string; state: RootState }
+>('comments/updateComment', async (args, { getState, rejectWithValue }) => {
+  if (!supabase) return rejectWithValue('Supabase is not configured')
+
+  const state = getState()
+  const user = state.auth.user
+  if (!user) return rejectWithValue('You must be logged in')
+
+  const content = args.content.trim()
+  const updateData: Record<string, unknown> = { content }
+
+  if (args.image_url !== undefined) {
+    updateData.image_url = args.image_url
+  }
+
+  const { data, error } = await supabase
+    .from('comments')
+    .update(updateData)
+    .eq('id', args.id)
+    .eq('user_id', user.id)
+    .select('id,post_id,user_id,username,content,image_url,created_at')
+    .single()
+
+  if (error) return rejectWithValue(error.message)
+
+  return data as Comment
+})
+
 export const deleteComment = createAsyncThunk<
   string,
   string,
@@ -138,6 +169,13 @@ const commentsSlice = createSlice({
         state.items.push(action.payload)
       })
       .addCase(createComment.rejected, (state, action) => {
+        state.error = action.payload ?? action.error.message ?? 'Error'
+      })
+      .addCase(updateComment.fulfilled, (state, action) => {
+        const idx = state.items.findIndex((c) => c.id === action.payload.id)
+        if (idx !== -1) state.items[idx] = action.payload
+      })
+      .addCase(updateComment.rejected, (state, action) => {
         state.error = action.payload ?? action.error.message ?? 'Error'
       })
       .addCase(deleteComment.fulfilled, (state, action) => {
